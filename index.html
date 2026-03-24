@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>My Lunar Calendar</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lunar">
+<meta name="theme-color" content="#080d1a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #080d1a;
+  --navy-2: #0e1628;
+  --navy-3: #151f38;
+  --navy-4: #1c2847;
+  --silver: #c8d4e8;
+  --silver-2: #8fa3c0;
+  --silver-3: #4a6080;
+  --accent: #7a9cb8;
+  --accent-2: #9abcd8;
+  --white: #f0f4ff;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; background:var(--navy); color:var(--silver); }
+
+#stars-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+.app { position:relative; z-index:1; height:100dvh; display:flex; flex-direction:column; padding-top:var(--safe-t); }
+
+/* ── HEADER ── */
+.app-header { padding:12px 20px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; border-bottom:1px solid rgba(200,212,232,0.07); }
+.header-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--white); }
+.header-title span { color:var(--accent-2); font-style:italic; }
+
+/* ── PAGES ── */
+.pages-viewport { flex:1; overflow:hidden; position:relative; }
+.pages-track { display:flex; height:100%; width:600%; transition:transform 0.38s cubic-bezier(0.4,0,0.2,1); will-change:transform; }
+.page { width:16.6667%; height:100%; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:calc(80px + var(--safe-b)); }
+.page::-webkit-scrollbar { display:none; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(8,13,26,0.94); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-top:1px solid rgba(200,212,232,0.1); display:flex; padding-bottom:var(--safe-b); z-index:200; }
+.nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9px 2px 6px; border:none; background:none; cursor:pointer; color:var(--silver-3); font-family:'Nunito',sans-serif; font-size:9px; font-weight:600; letter-spacing:0.3px; gap:3px; transition:color 0.2s; }
+.nav-btn .nav-icon { font-size:18px; line-height:1; }
+.nav-btn.active { color:var(--accent-2); }
+.nav-dot { width:4px; height:4px; border-radius:50%; background:var(--accent-2); opacity:0; margin-top:1px; transition:opacity 0.2s; }
+.nav-btn.active .nav-dot { opacity:1; }
+
+/* ── PAGE HEADERS (shared) ── */
+.page-header { padding:16px 20px 6px; }
+.page-header h2 { font-family:'DM Serif Display',serif; font-size:22px; color:var(--white); }
+.page-header small { display:block; font-family:'Nunito',sans-serif; font-size:11px; color:var(--silver-2); letter-spacing:1px; text-transform:uppercase; margin-top:2px; font-weight:400; }
+
+/* ════════════════════════════
+   TODAY PAGE
+════════════════════════════ */
+#page-today { position:relative; display:flex; flex-direction:column; align-items:center; }
+.today-bg { position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(80,30,160,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse at 15% 55%, rgba(20,110,70,0.38) 0%, transparent 45%),
+    radial-gradient(ellipse at 88% 65%, rgba(50,20,100,0.42) 0%, transparent 48%),
+    radial-gradient(ellipse at 70% 10%, rgba(30,80,50,0.28) 0%, transparent 38%),
+    radial-gradient(ellipse at 5% 90%, rgba(100,20,120,0.32) 0%, transparent 42%),
+    radial-gradient(ellipse at 90% 90%, rgba(10,70,50,0.25) 0%, transparent 40%);
+  pointer-events:none; }
+.today-inner { position:relative; z-index:1; width:100%; padding:10px 20px 0; display:flex; flex-direction:column; align-items:center; }
+
+/* top row: date left, moon phase name right */
+.today-top-row { width:100%; display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2px; }
+.today-date-left { font-family:'DM Serif Display',serif; font-style:italic; font-size:13px; color:var(--silver-2); opacity:0.9; line-height:1.3; }
+.moon-phase-italic { font-family:'DM Serif Display',serif; font-style:italic; font-size:13px; color:var(--silver-2); opacity:0.9; text-align:right; line-height:1.3; }
+
+/* cycle day / phase label row */
+.today-cycle-row { text-align:center; margin-bottom:10px; }
+.today-day-num { font-family:'DM Serif Display',serif; font-size:15px; color:var(--accent-2); letter-spacing:1px; }
+.today-phase-name { font-size:11px; color:var(--silver-2); letter-spacing:2px; text-transform:uppercase; margin-top:2px; font-weight:300; }
+
+/* moon */
+.moon-stage { width:min(225px,62vw); height:min(225px,62vw); margin:6px auto 8px; display:flex; align-items:center; justify-content:center; }
+.moon-emoji-display {
+  font-size:min(165px,46vw);
+  line-height:1; user-select:none;
+  filter: drop-shadow(0 0 36px rgba(200,195,150,0.5)) drop-shadow(0 0 72px rgba(170,155,90,0.28)) drop-shadow(0 0 110px rgba(130,110,50,0.16));
+  animation: moonFloat 6s ease-in-out infinite;
+}
+@keyframes moonFloat {
+  0%,100% { transform:translateY(0); filter:drop-shadow(0 0 36px rgba(200,195,150,0.5)) drop-shadow(0 0 72px rgba(170,155,90,0.28)); }
+  50%      { transform:translateY(-8px); filter:drop-shadow(0 0 50px rgba(200,195,150,0.68)) drop-shadow(0 0 95px rgba(170,155,90,0.4)); }
+}
+
+/* period countdown — shown below felt section */
+.period-cdown { font-size:12px; color:var(--silver-2); letter-spacing:1px; margin-top:13px; margin-bottom:4px; text-align:center; }
+.period-cdown strong { color:var(--white); font-weight:700; }
+
+/* "today you felt" section — no box */
+.today-felt-section { width:100%; margin-bottom:4px; text-align:center; }
+.today-felt-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--silver-2); margin-bottom:6px; }
+.today-felt-text { font-size:14px; color:var(--accent-2); font-style:italic; font-family:'DM Serif Display',serif; line-height:1.5; }
+
+/* ════════════════════════════
+   PHASE TAB
+════════════════════════════ */
+.phase-hero { margin:0 16px 14px; background:rgba(14,22,40,0.78); backdrop-filter:blur(14px); border:1px solid rgba(200,212,232,0.1); border-radius:20px; padding:20px; }
+.phase-hero .ph-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--white); margin-bottom:8px; }
+.phase-hero .ph-desc  { font-size:14px; color:var(--silver-2); line-height:1.7; font-style:italic; margin-bottom:16px; }
+.phase-guidance-row { margin-bottom:12px; }
+.phase-guidance-row .pgl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; display:block; margin-bottom:4px; }
+.phase-guidance-row .pgt { font-size:13px; color:var(--silver); line-height:1.6; }
+.pgl-menstruation { color:#e8a0a4; }
+.pgl-follicular   { color:#9acca8; }
+.pgl-ovulation    { color:#e8c96a; }
+.pgl-luteal       { color:#aaa0cc; }
+.phase-all-phases { padding:0 16px; }
+.phase-mini-card { background:rgba(14,22,40,0.6); border:1px solid rgba(200,212,232,0.08); border-left:3px solid; border-radius:14px; padding:14px 16px; margin-bottom:10px; }
+.phase-mini-card.menstruation { border-left-color:#d4878a; }
+.phase-mini-card.follicular   { border-left-color:#7aaa88; }
+.phase-mini-card.ovulation    { border-left-color:#c9a84c; }
+.phase-mini-card.luteal       { border-left-color:#8a7aaa; }
+.phase-mini-card h4 { font-family:'DM Serif Display',serif; font-size:15px; color:var(--white); margin-bottom:4px; }
+.phase-mini-card p  { font-size:12px; color:var(--silver-2); line-height:1.55; font-style:italic; }
+
+/* ════════════════════════════
+   CYCLE (CALENDAR) TAB
+════════════════════════════ */
+.timeline-card { margin:0 16px 14px; background:rgba(14,22,40,0.72); backdrop-filter:blur(10px); border:1px solid rgba(200,212,232,0.09); border-radius:18px; padding:14px 0 10px; }
+.track-title { font-size:10px; color:var(--silver-2); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; text-align:center; margin-bottom:10px; }
+.combined-cycles { display:flex; gap:7px; overflow-x:auto; padding:4px 16px 6px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.combined-cycles::-webkit-scrollbar { display:none; }
+.combined-day { display:flex; flex-direction:column; align-items:center; gap:5px; flex-shrink:0; }
+.cal-moon-cell { width:52px; height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(200,212,232,0.07); cursor:pointer; transition:transform 0.15s; gap:2px; }
+.cal-moon-cell:active { transform:scale(0.92); }
+.cal-moon-emoji { font-size:20px; line-height:1; }
+.cal-date-num { font-size:10px; color:var(--silver-2); font-weight:600; }
+.cal-cycle-cell { width:52px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:9px; font-weight:700; }
+.cal-cycle-cell.menstruation { background:linear-gradient(135deg,#d4878a,#c0747a); color:#fff; }
+.cal-cycle-cell.follicular   { background:linear-gradient(135deg,#7aaa88,#5d9070); color:#fff; }
+.cal-cycle-cell.ovulation    { background:linear-gradient(135deg,#c9a84c,#b08f36); color:#fff; }
+.cal-cycle-cell.luteal       { background:linear-gradient(135deg,#8a7aaa,#726090); color:#fff; }
+.today-highlight { border:2px solid var(--accent-2) !important; box-shadow:0 0 12px rgba(122,156,184,0.45) !important; }
+.cal-month-label { font-size:9px; color:var(--silver-3); text-transform:uppercase; letter-spacing:1px; margin-top:2px; font-weight:700; }
+.legend-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 16px 14px; }
+.legend-pill { display:flex; align-items:center; gap:10px; background:rgba(14,22,40,0.7); border:1px solid rgba(200,212,232,0.08); border-radius:12px; padding:10px 14px; }
+.legend-dot { width:20px; height:20px; border-radius:5px; flex-shrink:0; }
+.legend-dot.menstruation { background:linear-gradient(135deg,#d4878a,#c0747a); }
+.legend-dot.follicular   { background:linear-gradient(135deg,#7aaa88,#5d9070); }
+.legend-dot.ovulation    { background:linear-gradient(135deg,#c9a84c,#b08f36); }
+.legend-dot.luteal       { background:linear-gradient(135deg,#8a7aaa,#726090); }
+.legend-txt { font-size:11px; color:var(--silver); font-weight:600; }
+.legend-txt small { display:block; color:var(--silver-2); font-weight:400; font-size:10px; }
+
+/* ════════════════════════════
+   DETAILS (LOG) TAB
+════════════════════════════ */
+.log-list { padding:0 16px; }
+.log-row { display:flex; align-items:center; gap:10px; padding:9px 12px 9px 16px; border-radius:10px; margin-bottom:6px; background:rgba(14,22,40,0.72); border-left:4px solid; }
+.log-row.menstruation { border-left-color:#d4878a; }
+.log-row.follicular   { border-left-color:#7aaa88; }
+.log-row.ovulation    { border-left-color:#c9a84c; }
+.log-row.luteal       { border-left-color:#8a7aaa; }
+.log-day-label { font-size:11px; font-weight:700; min-width:52px; }
+.log-row.menstruation .log-day-label { color:#e8a0a4; }
+.log-row.follicular   .log-day-label { color:#9acca8; }
+.log-row.ovulation    .log-day-label { color:#e8c96a; }
+.log-row.luteal       .log-day-label { color:#aaa0cc; }
+.log-input { flex:1; padding:8px 10px; border:1px solid rgba(200,212,232,0.1); border-radius:8px; font-size:13px; color:var(--white); background:rgba(255,255,255,0.05); font-family:'Nunito',sans-serif; }
+.log-input::placeholder { color:var(--silver-3); }
+.log-input:focus { outline:none; border-color:var(--accent); }
+
+/* ════════════════════════════
+   PATTERNS TAB
+════════════════════════════ */
+.note-card { margin:0 16px 12px; background:rgba(14,22,40,0.72); backdrop-filter:blur(10px); border:1px solid rgba(200,212,232,0.09); border-radius:18px; padding:16px; border-left-width:4px; border-left-style:solid; }
+.note-card.menstruation { border-left-color:#c0747a; }
+.note-card.follicular   { border-left-color:#5d9070; }
+.note-card.ovulation    { border-left-color:#b08f36; }
+.note-card.luteal       { border-left-color:#726090; }
+.note-card h3 { font-family:'DM Serif Display',serif; font-size:17px; color:var(--white); margin-bottom:10px; }
+.note-card textarea { width:100%; min-height:88px; padding:10px 12px; border:1px solid rgba(200,212,232,0.1); border-radius:10px; font-size:13px; color:var(--white); background:rgba(255,255,255,0.05); font-family:'Nunito',sans-serif; resize:vertical; margin-bottom:10px; line-height:1.6; }
+.note-card textarea::placeholder { color:var(--silver-3); }
+.note-card textarea:focus { outline:none; border-color:var(--accent); }
+.btn-save { width:100%; padding:11px; border:none; border-radius:10px; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; cursor:pointer; font-family:'Nunito',sans-serif; color:var(--navy); transition:opacity 0.2s, transform 0.1s; }
+.btn-save:active { opacity:0.8; transform:scale(0.98); }
+.note-card.menstruation .btn-save { background:linear-gradient(135deg,#d4878a,#c0747a); }
+.note-card.follicular   .btn-save { background:linear-gradient(135deg,#7aaa88,#5d9070); }
+.note-card.ovulation    .btn-save { background:linear-gradient(135deg,#c9a84c,#b08f36); }
+.note-card.luteal       .btn-save { background:linear-gradient(135deg,#8a7aaa,#726090); }
+
+/* ════════════════════════════
+   CUSTOMIZE (SETTINGS) TAB
+════════════════════════════ */
+.settings-section { margin:0 16px 12px; background:rgba(14,22,40,0.72); backdrop-filter:blur(10px); border:1px solid rgba(200,212,232,0.09); border-radius:18px; overflow:hidden; }
+.settings-section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent-2); padding:14px 16px 6px; }
+.settings-row { padding:12px 16px; border-bottom:1px solid rgba(200,212,232,0.05); display:flex; flex-direction:column; gap:5px; }
+.settings-row:last-child { border-bottom:none; }
+.settings-label { font-size:13px; color:var(--white); font-weight:600; }
+.settings-sublabel { font-size:11px; color:var(--silver-2); }
+.settings-input { width:100%; padding:11px 14px; border:1px solid rgba(200,212,232,0.13); border-radius:10px; font-size:15px; color:var(--white); background:rgba(255,255,255,0.05); font-family:'Nunito',sans-serif; -webkit-appearance:none; color-scheme:dark; }
+.settings-input:focus { outline:none; border-color:var(--accent); }
+/* phase boundary grid */
+.phase-boundary-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:4px 0; }
+.pb-item label { font-size:10px; color:var(--silver-2); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
+.pb-item .pb-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+.pb-dot.menstruation { background:#d4878a; }
+.pb-dot.follicular   { background:#6a9ab5; }
+.pb-dot.ovulation    { background:#c9a84c; }
+.pb-dot.luteal       { background:#8a7aaa; }
+.pb-input { width:100%; padding:8px 12px; border:1px solid rgba(200,212,232,0.13); border-radius:8px; font-size:14px; color:var(--white); background:rgba(255,255,255,0.05); font-family:'Nunito',sans-serif; color-scheme:dark; }
+.pb-input:focus { outline:none; border-color:var(--accent); }
+.btn-update { width:calc(100% - 32px); margin:0 16px 14px; padding:15px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:var(--navy); border:none; border-radius:14px; font-size:13px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; font-family:'Nunito',sans-serif; box-shadow:0 4px 22px rgba(122,156,184,0.3); transition:opacity 0.2s, transform 0.1s; }
+.btn-update:active { transform:scale(0.98); opacity:0.9; }
+</style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<div class="app">
+  <header class="app-header">
+    <div class="header-title"><span>Harmony</span></div>
+  </header>
+
+  <div class="pages-viewport" id="pagesViewport">
+    <div class="pages-track" id="pagesTrack">
+
+      <!-- PAGE 0: TODAY -->
+      <div class="page" id="page-today">
+        <div class="today-bg"></div>
+        <div class="today-inner">
+
+          <div class="today-top-row">
+            <div class="today-date-left" id="todayDateLeft"></div>
+            <div class="moon-phase-italic" id="moonPhaseItalic"></div>
+          </div>
+
+          <div class="today-cycle-row">
+            <div class="today-day-num" id="todayDayNum">Day — of your cycle</div>
+            <div class="today-phase-name" id="todayPhaseName">Set your cycle in Customize</div>
+          </div>
+
+          <div class="moon-stage">
+            <div class="moon-emoji-display" id="moonEmojiDisplay">🌕</div>
+          </div>
+
+          <div class="today-felt-section" id="todayFeltSection" style="display:none">
+            <div class="today-felt-label">On this day of your cycle, you've felt</div>
+            <div class="today-felt-text" id="todayFeltText"></div>
+          </div>
+
+          <div class="period-cdown" id="periodCdown"></div>
+
+        </div>
+      </div>
+
+      <!-- PAGE 1: PHASE -->
+      <div class="page" id="page-phase">
+        <div class="page-header"><h2>Phases</h2></div>
+        <div class="phase-hero" id="phaseHero">
+          <div class="ph-title">Your Phase</div>
+          <div class="ph-desc">Set your cycle details in Customize to see your current phase guidance.</div>
+        </div>
+        <div class="phase-all-phases">
+          <div class="phase-mini-card menstruation"><h4>🕯️ Menstruation</h4><p>Inner Winter — release, renewal, rest.</p></div>
+          <div class="phase-mini-card follicular"><h4>🌷 Follicular</h4><p>Inner Spring — rising energy, new beginnings.</p></div>
+          <div class="phase-mini-card ovulation"><h4>✨ Ovulation</h4><p>Inner Summer — peak vitality, radiance, connection.</p></div>
+          <div class="phase-mini-card luteal"><h4>🍂 Luteal</h4><p>Inner Autumn — turning inward, completing, preparing.</p></div>
+        </div>
+      </div>
+
+      <!-- PAGE 2: CYCLE (was Calendar) -->
+      <div class="page" id="page-cycle">
+        <div class="page-header"><h2>Cycles</h2><small>Look at the moon and you</small></div>
+        <div class="timeline-card">
+          <div class="track-title">Moon Phase · Cycle Day</div>
+          <div class="combined-cycles" id="combinedCycles"></div>
+        </div>
+        <div class="legend-grid">
+          <div class="legend-pill"><div class="legend-dot menstruation"></div><div class="legend-txt">Menstruation<small>Days 1–5</small></div></div>
+          <div class="legend-pill"><div class="legend-dot follicular"></div><div class="legend-txt">Follicular<small>Days 6–13</small></div></div>
+          <div class="legend-pill"><div class="legend-dot ovulation"></div><div class="legend-txt">Ovulation<small>Days 14–16</small></div></div>
+          <div class="legend-pill"><div class="legend-dot luteal"></div><div class="legend-txt">Luteal<small>Days 17+</small></div></div>
+        </div>
+      </div>
+
+      <!-- PAGE 3: DETAILS (was Log) -->
+      <div class="page" id="page-details">
+        <div class="page-header"><h2>Details</h2><small>Paint a picture with small strokes</small></div>
+        <div class="log-list" id="dailyLogGrid"></div>
+      </div>
+
+      <!-- PAGE 4: PATTERNS -->
+      <div class="page" id="page-patterns">
+        <div class="page-header"><h2>Patterns</h2><small>Recognize your patterns from within</small></div>
+        <div class="note-card menstruation">
+          <h3>🕯️ Menstruation</h3>
+          <textarea id="notes-menstruation" placeholder="How do you feel during menstruation?"></textarea>
+          <button class="btn-save" onclick="saveNotes('menstruation')">Save Notes</button>
+        </div>
+        <div class="note-card follicular">
+          <h3>🌷 Follicular Phase</h3>
+          <textarea id="notes-follicular" placeholder="How do you feel during the follicular phase?"></textarea>
+          <button class="btn-save" onclick="saveNotes('follicular')">Save Notes</button>
+        </div>
+        <div class="note-card ovulation">
+          <h3>✨ Ovulation</h3>
+          <textarea id="notes-ovulation" placeholder="How do you feel during ovulation?"></textarea>
+          <button class="btn-save" onclick="saveNotes('ovulation')">Save Notes</button>
+        </div>
+        <div class="note-card luteal">
+          <h3>🍂 Luteal Phase</h3>
+          <textarea id="notes-luteal" placeholder="How do you feel during the luteal phase?"></textarea>
+          <button class="btn-save" onclick="saveNotes('luteal')">Save Notes</button>
+        </div>
+      </div>
+
+      <!-- PAGE 5: CUSTOMIZE (was Settings) -->
+      <div class="page" id="page-customize">
+        <div class="page-header"><h2>Customize</h2><small>Make it yours</small></div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Cycle Timeline</div>
+          <div class="settings-row">
+            <div class="settings-label">First Day of Last Period</div>
+            <input type="date" class="settings-input" id="lastPeriodDate">
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Cycle Length (days)</div>
+            <div class="settings-sublabel">Your average number of days per cycle</div>
+            <input type="number" class="settings-input" id="cycleLength" value="34" min="21" max="60">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Phase Lengths</div>
+          <div class="settings-row">
+            <div class="settings-label">Customize when each phase begins</div>
+            <div class="settings-sublabel">Enter the first day of each phase. Luteal starts automatically after ovulation ends.</div>
+            <div class="phase-boundary-grid">
+              <div class="pb-item">
+                <label><span class="pb-dot menstruation"></span>Menstruation starts</label>
+                <input type="number" class="pb-input" id="pb-mens-start" value="1" min="1" max="5">
+              </div>
+              <div class="pb-item">
+                <label><span class="pb-dot menstruation"></span>Menstruation ends</label>
+                <input type="number" class="pb-input" id="pb-mens-end" value="5" min="1" max="10">
+              </div>
+              <div class="pb-item">
+                <label><span class="pb-dot follicular"></span>Follicular ends</label>
+                <input type="number" class="pb-input" id="pb-foll-end" value="13" min="6" max="20">
+              </div>
+              <div class="pb-item">
+                <label><span class="pb-dot ovulation"></span>Ovulation ends</label>
+                <input type="number" class="pb-input" id="pb-ovul-end" value="16" min="10" max="25">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-update" onclick="updateCycles()">✦ Save &amp; Update</button>
+      </div>
+
+    </div><!-- /pages-track -->
+  </div><!-- /pages-viewport -->
+</div><!-- /app -->
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="goToPage(0,this)"><span class="nav-icon">🌸</span><span>Today</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(1,this)"><span class="nav-icon">🦋</span><span>Phases</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(2,this)"><span class="nav-icon">🌙</span><span>Cycles</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(3,this)"><span class="nav-icon">🎨</span><span>Details</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(4,this)"><span class="nav-icon">🐅</span><span>Patterns</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(5,this)"><span class="nav-icon">⭐</span><span>Customize</span><div class="nav-dot"></div></button>
+</nav>
+
+<script>
+// ── STARS ──
+(function(){
+  const c=document.getElementById('stars-canvas'),ctx=c.getContext('2d');
+  let stars=[];
+  function resize(){
+    c.width=innerWidth; c.height=innerHeight; stars=[];
+    const n=Math.floor(c.width*c.height/3800);
+    for(let i=0;i<n;i++) stars.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.1+0.15,a:Math.random()*0.65+0.15,sp:Math.random()*0.004+0.001,ph:Math.random()*Math.PI*2});
+  }
+  function draw(t){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      const a=s.a*(0.55+0.45*Math.sin(t*s.sp+s.ph));
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,212,232,${a})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);resize();requestAnimationFrame(draw);
+})();
+
+// ── NAVIGATION (6 pages) ──
+const TOTAL_PAGES=6;
+let currentPage=0;
+const track=document.getElementById('pagesTrack');
+const navBtns=document.querySelectorAll('.nav-btn');
+function goToPage(idx,btn){
+  currentPage=idx;
+  track.style.transform=`translateX(-${(100/TOTAL_PAGES)*idx}%)`;
+  navBtns.forEach(b=>b.classList.remove('active'));
+  (btn||navBtns[idx]).classList.add('active');
+}
+
+// ── TOUCH SWIPE ──
+let tx=0,ty=0,sw=false;
+const vp=document.getElementById('pagesViewport');
+vp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;sw=false;},{passive:true});
+vp.addEventListener('touchmove',e=>{const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;if(!sw&&Math.abs(dy)>Math.abs(dx))return;sw=true;},{passive:true});
+vp.addEventListener('touchend',e=>{
+  if(!sw)return;
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)<40)return;
+  if(dx<0&&currentPage<TOTAL_PAGES-1)goToPage(currentPage+1,null);
+  else if(dx>0&&currentPage>0)goToPage(currentPage-1,null);
+});
+
+// ── MOON DATA ──
+const MOON_EMOJI={'New Moon':'🌑','Waxing Crescent':'🌒','First Quarter':'🌓','Waxing Gibbous':'🌔','Full Moon':'🌕','Waning Gibbous':'🌖','Last Quarter':'🌗','Waning Crescent':'🌘'};
+const PHASES=[
+  {name:'New Moon'},{name:'Waxing Crescent'},{name:'First Quarter'},{name:'Waxing Gibbous'},
+  {name:'Full Moon'},{name:'Waning Gibbous'},{name:'Last Quarter'},{name:'Waning Crescent'}
+];
+
+function getMoonPhase(date){
+  const knownNewMoon=Date.UTC(2000,0,6,18,14,0);
+  const diff=(date.getTime()-knownNewMoon)/86400000;
+  const phase=((diff%29.53058867)+29.53058867)%29.53058867;
+  const thresholds=[1.84566,7.38264,9.22831,14.76529,16.61096,22.14794,23.99361,29.53059];
+  const idx=thresholds.findIndex(t=>phase<t);
+  return PHASES[idx===-1?0:idx];
+}
+
+// ── PHASE BOUNDARIES (customizable) ──
+function getPhaseBounds(){
+  return {
+    mensEnd:  parseInt(document.getElementById('pb-mens-end').value)||5,
+    follEnd:  parseInt(document.getElementById('pb-foll-end').value)||13,
+    ovulEnd:  parseInt(document.getElementById('pb-ovul-end').value)||16
+  };
+}
+
+function getMenstrualPhase(day){
+  const b=getPhaseBounds();
+  if(day<=b.mensEnd)  return'menstruation';
+  if(day<=b.follEnd)  return'follicular';
+  if(day<=b.ovulEnd)  return'ovulation';
+  return'luteal';
+}
+
+function getPhaseInfo(phase){
+  const d={
+    menstruation:{title:'Menstruation 🕯️',desc:'<em>Inner Winter.</em> A time of release and renewal. Energy turns inward — honour your need for rest.',expect:'Lower energy, possible cramps, need for warmth and stillness.',try:'Rest without guilt, gentle yoga, warm baths, nourishing soups, journaling.',diet:'Iron-rich foods, warm broths, omega-3s, dark chocolate for magnesium.'},
+    follicular:  {title:'Follicular Phase 🌷',desc:'<em>Inner Spring.</em> Rising energy, rising estrogen. A season of new beginnings and creative spark.',expect:'Growing energy, mental clarity, optimism and curiosity.',try:'Start new projects, challenging workouts, brainstorming, planning ahead.',diet:'Lean proteins, fermented foods, fresh vegetables, pumpkin seeds.'},
+    ovulation:   {title:'Ovulation ✨',desc:'<em>Inner Summer.</em> Peak vitality and radiance. You are magnetic, expressive, and at your most vibrant.',expect:'Peak energy, confidence, heightened intuition, social ease.',try:'Presentations, intense movement, creative expression, celebrating.',diet:'Light raw foods, anti-inflammatory spices, berries, stay hydrated.'},
+    luteal:      {title:'Luteal Phase 🍂',desc:'<em>Inner Autumn.</em> A gradual turn inward. Time to complete, reflect, and prepare for rest.',expect:'Gradual energy decline, mood shifts, increased appetite.',try:'Complete tasks, moderate walks or pilates, meal prep, cozy wind-down rituals.',diet:'Complex carbs (oats, sweet potato), magnesium-rich nuts, B-vitamins, calcium.'}
+  };
+  return d[phase];
+}
+
+// Parse a date string "YYYY-MM-DD" as LOCAL midnight (avoids UTC timezone shift bug)
+function parseLocalDate(str){
+  const [y,m,d]=str.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+
+function getCurrentCycleDay(){
+  const val=document.getElementById('lastPeriodDate').value;
+  if(!val)return null;
+  const cl=parseInt(document.getElementById('cycleLength').value);
+  const today=new Date();today.setHours(0,0,0,0);
+  const last=parseLocalDate(val);
+  return(Math.floor((today-last)/86400000)%cl)+1;
+}
+
+// ── MAIN UPDATE ──
+function updateCycles(){
+  const val=document.getElementById('lastPeriodDate').value;
+  if(!val){alert('Please enter the first day of your last period in Customize.');goToPage(5,null);return;}
+  saveSettings();
+
+  const cl=parseInt(document.getElementById('cycleLength').value);
+  const lpd=parseLocalDate(val);
+  const day=getCurrentCycleDay();
+  const phase=getMenstrualPhase(day);
+  const info=getPhaseInfo(phase);
+  const until=cl-day;
+  const note=localStorage.getItem(`dailyLog-${day}`)||'';
+
+  // Today's date label
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+  document.getElementById('todayDateLeft').textContent=dateStr;
+
+  // Moon
+  const moonPhase=getMoonPhase(now);
+  document.getElementById('moonPhaseItalic').textContent=moonPhase.name+' Moon';
+  document.getElementById('moonEmojiDisplay').textContent=MOON_EMOJI[moonPhase.name]||'🌕';
+
+  // Cycle info
+  document.getElementById('todayDayNum').textContent=`Day ${day} of your cycle`;
+  document.getElementById('todayPhaseName').textContent=info.title;
+  document.getElementById('periodCdown').innerHTML=`Next period in <strong>${until} day${until!==1?'s':''}</strong>`;
+
+  // Today felt
+  const feltSection=document.getElementById('todayFeltSection');
+  if(note){
+    feltSection.style.display='block';
+    document.getElementById('todayFeltText').textContent=note;
+  } else {
+    feltSection.style.display='none';
+  }
+
+  // Phase tab
+  document.getElementById('phaseHero').innerHTML=`
+    <div class="ph-title">${info.title}</div>
+    <div class="ph-desc">${info.desc}</div>
+    <div class="phase-guidance-row"><span class="pgl pgl-${phase}">Expect</span><span class="pgt">${info.expect}</span></div>
+    <div class="phase-guidance-row"><span class="pgl pgl-${phase}">Try</span><span class="pgt">${info.try}</span></div>
+    <div class="phase-guidance-row"><span class="pgl pgl-${phase}">Diet</span><span class="pgt">${info.diet}</span></div>
+  `;
+
+  buildTimeline(lpd,cl);
+  generateDailyLog();
+}
+
+// ── TIMELINE ──
+function buildTimeline(lpd,cl){
+  const con=document.getElementById('combinedCycles');con.innerHTML='';
+  const today=new Date();today.setHours(0,0,0,0);
+  const ds=Math.floor((today-lpd)/86400000);
+  const total=35,before=12,startOff=ds-before;
+  let lastM=-1;
+  for(let i=0;i<total;i++){
+    const d=new Date(lpd);d.setDate(lpd.getDate()+startOff+i);d.setHours(0,0,0,0);
+    const isT=d.getDate()===today.getDate()&&d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear();
+    const mp=getMoonPhase(d);
+    const cd=((startOff+i)%cl)+1;
+    const cp=getMenstrualPhase(cd);
+    const col=document.createElement('div');col.className='combined-day';
+    const mc=document.createElement('div');mc.className='cal-moon-cell'+(isT?' today-highlight':'');
+    mc.innerHTML=`<div class="cal-moon-emoji">${MOON_EMOJI[mp.name]}</div><div class="cal-date-num">${d.getDate()}</div>`;
+    const cc=document.createElement('div');cc.className=`cal-cycle-cell ${cp}`+(isT?' today-highlight':'');
+    cc.textContent=`Day ${cd}`;
+    col.appendChild(mc);col.appendChild(cc);
+    const m=d.getMonth();
+    if(m!==lastM){const ml=document.createElement('div');ml.className='cal-month-label';ml.textContent=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m];col.appendChild(ml);lastM=m;}
+    con.appendChild(col);
+  }
+  // Use rAF to ensure DOM has painted before measuring offsetWidth
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const dw=59; // col width 52px + gap 7px
+      const scrollPos=before*dw-(con.offsetWidth/2)+(dw/2);
+      con.scrollLeft=Math.max(0,scrollPos);
+    });
+  });
+}
+
+// ── SETTINGS ──
+function saveSettings(){
+  localStorage.setItem('cycleSettings',JSON.stringify({
+    lastPeriodDate:document.getElementById('lastPeriodDate').value,
+    cycleLength:document.getElementById('cycleLength').value,
+    pbMensEnd:document.getElementById('pb-mens-end').value,
+    pbFollEnd:document.getElementById('pb-foll-end').value,
+    pbOvulEnd:document.getElementById('pb-ovul-end').value
+  }));
+}
+function loadSettings(){
+  const s=localStorage.getItem('cycleSettings');
+  if(s){
+    const p=JSON.parse(s);
+    document.getElementById('lastPeriodDate').value=p.lastPeriodDate||'';
+    document.getElementById('cycleLength').value=p.cycleLength||34;
+    if(p.pbMensEnd) document.getElementById('pb-mens-end').value=p.pbMensEnd;
+    if(p.pbFollEnd) document.getElementById('pb-foll-end').value=p.pbFollEnd;
+    if(p.pbOvulEnd) document.getElementById('pb-ovul-end').value=p.pbOvulEnd;
+    return!!p.lastPeriodDate;
+  }
+  return false;
+}
+
+// ── NOTES ──
+function saveNotes(phase){
+  const ta=document.getElementById(`notes-${phase}`);
+  localStorage.setItem(`cycleNotes-${phase}`,ta.value);
+  const btn=ta.nextElementSibling;const orig=btn.textContent;
+  btn.textContent='✓ Saved';setTimeout(()=>btn.textContent=orig,2000);
+}
+function loadNotes(){
+  ['menstruation','follicular','ovulation','luteal'].forEach(p=>{
+    const s=localStorage.getItem(`cycleNotes-${p}`);
+    if(s)document.getElementById(`notes-${p}`).value=s;
+  });
+}
+
+// ── DAILY LOG ──
+function generateDailyLog(){
+  const cl=parseInt(document.getElementById('cycleLength').value);
+  const grid=document.getElementById('dailyLogGrid');grid.innerHTML='';
+  for(let day=1;day<=cl;day++){
+    const ph=getMenstrualPhase(day);
+    const row=document.createElement('div');row.className=`log-row ${ph}`;
+    const lbl=document.createElement('div');lbl.className='log-day-label';lbl.textContent=`Day ${day}`;
+    const inp=document.createElement('input');inp.type='text';inp.className='log-input';
+    inp.placeholder='Note symptoms…';inp.id=`daily-log-${day}`;
+    inp.addEventListener('blur',()=>{
+      localStorage.setItem(`dailyLog-${day}`,inp.value);
+      const cd=getCurrentCycleDay();if(day===cd)updateCycles();
+    });
+    row.appendChild(lbl);row.appendChild(inp);grid.appendChild(row);
+  }
+  loadDailyLog();
+}
+function loadDailyLog(){
+  const cl=parseInt(document.getElementById('cycleLength').value);
+  for(let day=1;day<=cl;day++){
+    const s=localStorage.getItem(`dailyLog-${day}`);
+    const inp=document.getElementById(`daily-log-${day}`);
+    if(s&&inp)inp.value=s;
+  }
+}
+
+// ── INIT ──
+const hasSettings=loadSettings();
+loadNotes();
+if(hasSettings){
+  updateCycles();
+}else{
+  document.getElementById('lastPeriodDate').value='2025-01-26';
+  const now=new Date();
+  const initMoon=getMoonPhase(now);
+  document.getElementById('moonEmojiDisplay').textContent=MOON_EMOJI[initMoon.name]||'🌕';
+  document.getElementById('moonPhaseItalic').textContent=initMoon.name+' Moon';
+  document.getElementById('todayDateLeft').textContent=now.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+  generateDailyLog();
+}
+</script>
+</body>
+</html>
