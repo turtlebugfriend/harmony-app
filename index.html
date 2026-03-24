@@ -70,13 +70,17 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
   pointer-events:none; }
 .today-inner { position:relative; z-index:1; width:100%; padding:10px 20px 0; display:flex; flex-direction:column; align-items:center; }
 
+/* today page header */
+.today-page-header { width:100%; padding:16px 0 0; }
+.today-page-header h2 { font-family:'DM Serif Display',serif; font-size:22px; color:var(--white); }
+
 /* top row: date left, moon phase name right */
 .today-top-row { width:100%; display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2px; }
 .today-date-left { font-family:'DM Serif Display',serif; font-style:italic; font-size:13px; color:var(--silver-2); opacity:0.9; line-height:1.3; }
 .moon-phase-italic { font-family:'DM Serif Display',serif; font-style:italic; font-size:13px; color:var(--silver-2); opacity:0.9; text-align:right; line-height:1.3; }
 
 /* cycle day / phase label row */
-.today-cycle-row { text-align:center; margin-bottom:10px; }
+.today-cycle-row { text-align:center; margin-top:50px; margin-bottom:10px; }
 .today-day-num { font-family:'DM Serif Display',serif; font-size:15px; color:var(--accent-2); letter-spacing:1px; }
 .today-phase-name { font-size:11px; color:var(--silver-2); letter-spacing:2px; text-transform:uppercase; margin-top:2px; font-weight:300; }
 
@@ -127,22 +131,20 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 /* ════════════════════════════
    CYCLE (CALENDAR) TAB
 ════════════════════════════ */
-.timeline-card { margin:0 16px 14px; background:rgba(14,22,40,0.72); backdrop-filter:blur(10px); border:1px solid rgba(200,212,232,0.09); border-radius:18px; padding:14px 0 10px; }
-.track-title { font-size:10px; color:var(--silver-2); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; text-align:center; margin-bottom:10px; }
-.combined-cycles { display:flex; gap:7px; overflow-x:auto; padding:4px 16px 6px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-.combined-cycles::-webkit-scrollbar { display:none; }
-.combined-day { display:flex; flex-direction:column; align-items:center; gap:5px; flex-shrink:0; }
-.cal-moon-cell { width:52px; height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(200,212,232,0.07); cursor:pointer; transition:transform 0.15s; gap:2px; }
-.cal-moon-cell:active { transform:scale(0.92); }
-.cal-moon-emoji { font-size:20px; line-height:1; }
-.cal-date-num { font-size:10px; color:var(--silver-2); font-weight:600; }
-.cal-cycle-cell { width:52px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:9px; font-weight:700; }
+.timeline-card { margin:0 16px 14px; background:rgba(14,22,40,0.72); backdrop-filter:blur(10px); border:1px solid rgba(200,212,232,0.09); border-radius:18px; padding:14px 16px 16px; }
+.track-title { font-size:10px; color:var(--silver-2); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; text-align:center; margin-bottom:12px; }
+.cycles-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.combined-day { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.cal-moon-cell { width:100%; aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(200,212,232,0.07); gap:2px; }
+.cal-moon-emoji { font-size:18px; line-height:1; }
+.cal-date-num { font-size:9px; color:var(--silver-2); font-weight:600; }
+.cal-cycle-cell { width:100%; height:26px; display:flex; align-items:center; justify-content:center; border-radius:7px; font-size:8px; font-weight:700; }
 .cal-cycle-cell.menstruation { background:linear-gradient(135deg,#d4878a,#c0747a); color:#fff; }
 .cal-cycle-cell.follicular   { background:linear-gradient(135deg,#7aaa88,#5d9070); color:#fff; }
 .cal-cycle-cell.ovulation    { background:linear-gradient(135deg,#c9a84c,#b08f36); color:#fff; }
 .cal-cycle-cell.luteal       { background:linear-gradient(135deg,#8a7aaa,#726090); color:#fff; }
-.today-highlight { border:2px solid var(--accent-2) !important; box-shadow:0 0 12px rgba(122,156,184,0.45) !important; }
-.cal-month-label { font-size:9px; color:var(--silver-3); text-transform:uppercase; letter-spacing:1px; margin-top:2px; font-weight:700; }
+.today-highlight { border:2px solid var(--accent-2) !important; box-shadow:0 0 10px rgba(122,156,184,0.45) !important; }
+.cal-month-label { font-size:8px; color:var(--silver-3); text-transform:uppercase; letter-spacing:0.8px; margin-top:1px; font-weight:700; text-align:center; }
 .legend-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 16px 14px; }
 .legend-pill { display:flex; align-items:center; gap:10px; background:rgba(14,22,40,0.7); border:1px solid rgba(200,212,232,0.08); border-radius:12px; padding:10px 14px; }
 .legend-dot { width:20px; height:20px; border-radius:5px; flex-shrink:0; }
@@ -229,6 +231,9 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
       <div class="page" id="page-today">
         <div class="today-bg"></div>
         <div class="today-inner">
+          <div class="today-page-header">
+            <h2>Today</h2>
+          </div>
 
           <div class="today-top-row">
             <div class="today-date-left" id="todayDateLeft"></div>
@@ -274,7 +279,7 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
         <div class="page-header"><h2>Cycles</h2><small>Look at the moon and you</small></div>
         <div class="timeline-card">
           <div class="track-title">Moon Phase · Cycle Day</div>
-          <div class="combined-cycles" id="combinedCycles"></div>
+          <div class="cycles-grid" id="combinedCycles"></div>
         </div>
         <div class="legend-grid">
           <div class="legend-pill"><div class="legend-dot menstruation"></div><div class="legend-txt">Menstruation<small>Days 1–5</small></div></div>
@@ -366,12 +371,12 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 </div><!-- /app -->
 
 <nav class="bottom-nav">
-  <button class="nav-btn active" onclick="goToPage(0,this)"><span class="nav-icon">🌸</span><span>Today</span><div class="nav-dot"></div></button>
+  <button class="nav-btn active" onclick="goToPage(0,this)"><span class="nav-icon">🪷</span><span>Today</span><div class="nav-dot"></div></button>
   <button class="nav-btn" onclick="goToPage(1,this)"><span class="nav-icon">🦋</span><span>Phases</span><div class="nav-dot"></div></button>
   <button class="nav-btn" onclick="goToPage(2,this)"><span class="nav-icon">🌙</span><span>Cycles</span><div class="nav-dot"></div></button>
   <button class="nav-btn" onclick="goToPage(3,this)"><span class="nav-icon">🎨</span><span>Details</span><div class="nav-dot"></div></button>
-  <button class="nav-btn" onclick="goToPage(4,this)"><span class="nav-icon">🐅</span><span>Patterns</span><div class="nav-dot"></div></button>
-  <button class="nav-btn" onclick="goToPage(5,this)"><span class="nav-icon">⭐</span><span>Customize</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(4,this)"><span class="nav-icon">🪶</span><span>Patterns</span><div class="nav-dot"></div></button>
+  <button class="nav-btn" onclick="goToPage(5,this)"><span class="nav-icon">🪄</span><span>Customize</span><div class="nav-dot"></div></button>
 </nav>
 
 <script>
@@ -530,37 +535,41 @@ function updateCycles(){
   generateDailyLog();
 }
 
-// ── TIMELINE ──
+// ── TIMELINE (15-day grid, 3 rows of 5, today centered) ──
 function buildTimeline(lpd,cl){
   const con=document.getElementById('combinedCycles');con.innerHTML='';
   const today=new Date();today.setHours(0,0,0,0);
   const ds=Math.floor((today-lpd)/86400000);
-  const total=35,before=12,startOff=ds-before;
-  let lastM=-1;
+  // 15 days: 7 before today, today, 7 after
+  const total=15, before=7, startOff=ds-before;
+
   for(let i=0;i<total;i++){
     const d=new Date(lpd);d.setDate(lpd.getDate()+startOff+i);d.setHours(0,0,0,0);
     const isT=d.getDate()===today.getDate()&&d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear();
     const mp=getMoonPhase(d);
     const cd=((startOff+i)%cl)+1;
     const cp=getMenstrualPhase(cd);
+
     const col=document.createElement('div');col.className='combined-day';
+
     const mc=document.createElement('div');mc.className='cal-moon-cell'+(isT?' today-highlight':'');
     mc.innerHTML=`<div class="cal-moon-emoji">${MOON_EMOJI[mp.name]}</div><div class="cal-date-num">${d.getDate()}</div>`;
+
     const cc=document.createElement('div');cc.className=`cal-cycle-cell ${cp}`+(isT?' today-highlight':'');
     cc.textContent=`Day ${cd}`;
+
     col.appendChild(mc);col.appendChild(cc);
+
+    // Month label when month changes
     const m=d.getMonth();
-    if(m!==lastM){const ml=document.createElement('div');ml.className='cal-month-label';ml.textContent=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m];col.appendChild(ml);lastM=m;}
+    if(i===0||(i>0&&d.getDate()===1)){
+      const ml=document.createElement('div');ml.className='cal-month-label';
+      ml.textContent=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m];
+      col.appendChild(ml);
+    }
+
     con.appendChild(col);
   }
-  // Use rAF to ensure DOM has painted before measuring offsetWidth
-  requestAnimationFrame(()=>{
-    requestAnimationFrame(()=>{
-      const dw=59; // col width 52px + gap 7px
-      const scrollPos=before*dw-(con.offsetWidth/2)+(dw/2);
-      con.scrollLeft=Math.max(0,scrollPos);
-    });
-  });
 }
 
 // ── SETTINGS ──
