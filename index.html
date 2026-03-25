@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>My Lunar Calendar</title>
+<title>Harmony</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Lunar">
+<meta name="apple-mobile-web-app-title" content="Harmony">
 <meta name="theme-color" content="#080d1a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,8 +32,8 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 .app { position:relative; z-index:1; height:100dvh; display:flex; flex-direction:column; padding-top:var(--safe-t); }
 
 /* ── HEADER ── */
-.app-header { padding:12px 20px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; border-bottom:1px solid rgba(200,212,232,0.07); }
-.header-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--white); }
+.app-header { padding:12px 20px 10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border-bottom:1px solid rgba(200,212,232,0.07); }
+.header-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--white); text-align:center; }
 .header-title span { color:var(--accent-2); font-style:italic; }
 
 /* ── PAGES ── */
@@ -68,10 +68,10 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
     radial-gradient(ellipse at 5% 90%, rgba(100,20,120,0.32) 0%, transparent 42%),
     radial-gradient(ellipse at 90% 90%, rgba(10,70,50,0.25) 0%, transparent 40%);
   pointer-events:none; }
-.today-inner { position:relative; z-index:1; width:100%; padding:10px 20px 0; display:flex; flex-direction:column; align-items:center; }
+.today-inner { position:relative; z-index:1; width:100%; padding:0 20px 0; display:flex; flex-direction:column; align-items:center; }
 
-/* today page header */
-.today-page-header { width:100%; padding:16px 0 0; }
+/* today page header — exact same padding as .page-header */
+.today-page-header { width:100%; padding:16px 0 6px; }
 .today-page-header h2 { font-family:'DM Serif Display',serif; font-size:22px; color:var(--white); }
 
 /* top row: date left, moon phase name right */
@@ -80,14 +80,21 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 .moon-phase-italic { font-family:'DM Serif Display',serif; font-style:italic; font-size:13px; color:var(--silver-2); opacity:0.9; text-align:right; line-height:1.3; }
 
 /* cycle day / phase label row */
-.today-cycle-row { text-align:center; margin-top:50px; margin-bottom:10px; }
-.today-day-num { font-family:'DM Serif Display',serif; font-size:15px; color:var(--accent-2); letter-spacing:1px; }
+.today-cycle-row { text-align:center; margin-top:50px; margin-bottom:20px; }
+.today-day-num { font-family:'DM Serif Display',serif; font-size:15px; color:var(--accent-2); letter-spacing:1px; margin-bottom:10px; }
 .today-phase-name { font-size:11px; color:var(--silver-2); letter-spacing:2px; text-transform:uppercase; margin-top:2px; font-weight:300; }
 
+/* moon triptych: insight left · moon center · correlation right */
+.moon-triptych { width:100%; display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.moon-side-text { flex:1; font-family:'DM Serif Display',serif; font-style:italic; font-size:11px; line-height:1.65; color:var(--silver-2); opacity:0.85; }
+.moon-side-left  { text-align:right; }
+.moon-side-right { text-align:left; }
+.moon-triptych-center { flex-shrink:0; }
+
 /* moon */
-.moon-stage { width:min(225px,62vw); height:min(225px,62vw); margin:6px auto 8px; display:flex; align-items:center; justify-content:center; }
+.moon-stage { width:min(160px,44vw); height:min(160px,44vw); display:flex; align-items:center; justify-content:center; }
 .moon-emoji-display {
-  font-size:min(165px,46vw);
+  font-size:min(120px,33vw);
   line-height:1; user-select:none;
   filter: drop-shadow(0 0 36px rgba(200,195,150,0.5)) drop-shadow(0 0 72px rgba(170,155,90,0.28)) drop-shadow(0 0 110px rgba(130,110,50,0.16));
   animation: moonFloat 6s ease-in-out infinite;
@@ -98,7 +105,7 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 }
 
 /* period countdown — shown below felt section */
-.period-cdown { font-size:12px; color:var(--silver-2); letter-spacing:1px; margin-top:13px; margin-bottom:4px; text-align:center; }
+.period-cdown { font-size:12px; color:var(--silver-2); letter-spacing:1px; margin-top:28px; margin-bottom:4px; text-align:center; }
 .period-cdown strong { color:var(--white); font-weight:700; }
 
 /* "today you felt" section — no box */
@@ -107,11 +114,8 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 .today-felt-text { font-size:14px; color:var(--accent-2); font-style:italic; font-family:'DM Serif Display',serif; line-height:1.5; }
 
 /* ════════════════════════════
-   PHASE TAB
+   PHASE TAB — accordion
 ════════════════════════════ */
-.phase-hero { margin:0 16px 14px; background:rgba(14,22,40,0.78); backdrop-filter:blur(14px); border:1px solid rgba(200,212,232,0.1); border-radius:20px; padding:20px; }
-.phase-hero .ph-title { font-family:'DM Serif Display',serif; font-size:22px; color:var(--white); margin-bottom:8px; }
-.phase-hero .ph-desc  { font-size:14px; color:var(--silver-2); line-height:1.7; font-style:italic; margin-bottom:16px; }
 .phase-guidance-row { margin-bottom:12px; }
 .phase-guidance-row .pgl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; display:block; margin-bottom:4px; }
 .phase-guidance-row .pgt { font-size:13px; color:var(--silver); line-height:1.6; }
@@ -119,23 +123,35 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 .pgl-follicular   { color:#9acca8; }
 .pgl-ovulation    { color:#e8c96a; }
 .pgl-luteal       { color:#aaa0cc; }
-.phase-all-phases { padding:0 16px; }
-.phase-mini-card { background:rgba(14,22,40,0.6); border:1px solid rgba(200,212,232,0.08); border-left:3px solid; border-radius:14px; padding:14px 16px; margin-bottom:10px; }
-.phase-mini-card.menstruation { border-left-color:#d4878a; }
-.phase-mini-card.follicular   { border-left-color:#7aaa88; }
-.phase-mini-card.ovulation    { border-left-color:#c9a84c; }
-.phase-mini-card.luteal       { border-left-color:#8a7aaa; }
-.phase-mini-card h4 { font-family:'DM Serif Display',serif; font-size:15px; color:var(--white); margin-bottom:4px; }
-.phase-mini-card p  { font-size:12px; color:var(--silver-2); line-height:1.55; font-style:italic; }
+.phase-all-phases { padding:0 16px 16px; }
+.phase-accordion-card { border-left:3px solid; border-radius:14px; margin-bottom:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.2s; }
+.phase-accordion-card.menstruation { border-left-color:#d4878a; background:rgba(14,22,40,0.6); border:1px solid rgba(200,212,232,0.08); border-left:3px solid #d4878a; }
+.phase-accordion-card.follicular   { border-left-color:#7aaa88; background:rgba(14,22,40,0.6); border:1px solid rgba(200,212,232,0.08); border-left:3px solid #7aaa88; }
+.phase-accordion-card.ovulation    { border-left-color:#c9a84c; background:rgba(14,22,40,0.6); border:1px solid rgba(200,212,232,0.08); border-left:3px solid #c9a84c; }
+.phase-accordion-card.luteal       { border-left-color:#8a7aaa; background:rgba(14,22,40,0.6); border:1px solid rgba(200,212,232,0.08); border-left:3px solid #8a7aaa; }
+.phase-accordion-card.active { background:rgba(14,22,40,0.88); box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+.phase-card-header { padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
+.phase-card-header h4 { font-family:'DM Serif Display',serif; font-size:16px; color:var(--white); }
+.phase-card-header .ph-arrow { font-size:10px; color:var(--silver-3); transition:transform 0.25s; }
+.phase-accordion-card.active .ph-arrow { transform:rotate(180deg); }
+.phase-card-body { display:none; padding:0 16px 16px; }
+.phase-accordion-card.active .phase-card-body { display:block; }
+.phase-card-body .ph-desc { font-size:13px; color:var(--silver-2); line-height:1.65; font-style:italic; margin-bottom:12px; }
 
 /* ════════════════════════════
    CYCLE (CALENDAR) TAB
 ════════════════════════════ */
 .timeline-card { margin:0 16px 14px; background:rgba(14,22,40,0.72); backdrop-filter:blur(10px); border:1px solid rgba(200,212,232,0.09); border-radius:18px; padding:14px 16px 16px; }
-.track-title { font-size:10px; color:var(--silver-2); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; text-align:center; margin-bottom:12px; }
-.cycles-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.track-title { font-size:10px; color:var(--silver-2); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; text-align:center; margin-bottom:8px; }
+/* month header row above grid */
+.cycle-month-header { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:4px; }
+.cycle-month-cell { font-size:9px; color:var(--silver-3); font-weight:700; text-transform:uppercase; letter-spacing:0.8px; text-align:center; min-height:12px; }
+/* main grid — 3 rows visible, scrollable for more */
+.cycles-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; max-height:calc(3 * (60px + 32px + 6px + 6px)); overflow-y:auto; scrollbar-width:none; }
+.cycles-grid::-webkit-scrollbar { display:none; }
 .combined-day { display:flex; flex-direction:column; align-items:center; gap:4px; }
 .cal-moon-cell { width:100%; aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(200,212,232,0.07); gap:2px; }
+.today-marker-label { font-size:7px; font-weight:800; letter-spacing:1px; color:var(--accent-2); text-transform:uppercase; line-height:1; margin-bottom:1px; }
 .cal-moon-emoji { font-size:18px; line-height:1; }
 .cal-date-num { font-size:9px; color:var(--silver-2); font-weight:600; }
 .cal-cycle-cell { width:100%; height:26px; display:flex; align-items:center; justify-content:center; border-radius:7px; font-size:8px; font-weight:700; }
@@ -144,7 +160,9 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
 .cal-cycle-cell.ovulation    { background:linear-gradient(135deg,#c9a84c,#b08f36); color:#fff; }
 .cal-cycle-cell.luteal       { background:linear-gradient(135deg,#8a7aaa,#726090); color:#fff; }
 .today-highlight { border:2px solid var(--accent-2) !important; box-shadow:0 0 10px rgba(122,156,184,0.45) !important; }
-.cal-month-label { font-size:8px; color:var(--silver-3); text-transform:uppercase; letter-spacing:0.8px; margin-top:1px; font-weight:700; text-align:center; }
+.cal-month-label { display:none; } /* handled by header row now */
+/* full-width month label that appears between grid rows when month changes */
+.cycle-row-month-label { grid-column:1/-1; font-size:10px; color:var(--silver-2); font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:6px 2px 2px; }
 .legend-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 16px 14px; }
 .legend-pill { display:flex; align-items:center; gap:10px; background:rgba(14,22,40,0.7); border:1px solid rgba(200,212,232,0.08); border-radius:12px; padding:10px 14px; }
 .legend-dot { width:20px; height:20px; border-radius:5px; flex-shrink:0; }
@@ -245,8 +263,14 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
             <div class="today-phase-name" id="todayPhaseName">Set your cycle in Customize</div>
           </div>
 
-          <div class="moon-stage">
-            <div class="moon-emoji-display" id="moonEmojiDisplay">🌕</div>
+          <div class="moon-triptych">
+            <div class="moon-side-text moon-side-left" id="moonInsightLeft"></div>
+            <div class="moon-triptych-center">
+              <div class="moon-stage">
+                <div class="moon-emoji-display" id="moonEmojiDisplay">🌕</div>
+              </div>
+            </div>
+            <div class="moon-side-text moon-side-right" id="moonCorrelationRight"></div>
           </div>
 
           <div class="today-felt-section" id="todayFeltSection" style="display:none">
@@ -262,15 +286,8 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
       <!-- PAGE 1: PHASE -->
       <div class="page" id="page-phase">
         <div class="page-header"><h2>Phases</h2></div>
-        <div class="phase-hero" id="phaseHero">
-          <div class="ph-title">Your Phase</div>
-          <div class="ph-desc">Set your cycle details in Customize to see your current phase guidance.</div>
-        </div>
-        <div class="phase-all-phases">
-          <div class="phase-mini-card menstruation"><h4>🕯️ Menstruation</h4><p>Inner Winter — release, renewal, rest.</p></div>
-          <div class="phase-mini-card follicular"><h4>🌷 Follicular</h4><p>Inner Spring — rising energy, new beginnings.</p></div>
-          <div class="phase-mini-card ovulation"><h4>✨ Ovulation</h4><p>Inner Summer — peak vitality, radiance, connection.</p></div>
-          <div class="phase-mini-card luteal"><h4>🍂 Luteal</h4><p>Inner Autumn — turning inward, completing, preparing.</p></div>
+        <div class="phase-all-phases" id="phaseAccordion">
+          <!-- built by JS -->
         </div>
       </div>
 
@@ -279,6 +296,7 @@ html, body { height:100%; overflow:hidden; font-family:'Nunito',sans-serif; back
         <div class="page-header"><h2>Cycles</h2><small>Look at the moon and you</small></div>
         <div class="timeline-card">
           <div class="track-title">Moon Phase · Cycle Day</div>
+          <div class="cycle-month-header" id="cycleMonthHeader"></div>
           <div class="cycles-grid" id="combinedCycles"></div>
         </div>
         <div class="legend-grid">
@@ -484,6 +502,51 @@ function getCurrentCycleDay(){
   return(Math.floor((today-last)/86400000)%cl)+1;
 }
 
+// ── MOON INSIGHTS & CYCLE CORRELATIONS ──
+const MOON_INSIGHTS = {
+  'New Moon':        { insight:'Seeds planted in darkness take root unseen.',           correlation:'You are also beginning something. Trust the invisible.' },
+  'Waxing Crescent': { insight:'A sliver of light — the first whisper of becoming.',    correlation:'Something in you is leaning toward the light too.' },
+  'First Quarter':   { insight:'Half lit, half shadow — the art of choosing.',          correlation:'Your body holds both tension and possibility right now.' },
+  'Waxing Gibbous':  { insight:'Almost full. The tide is nearly at its peak.',          correlation:'You are ripening. Let yourself be almost ready.' },
+  'Full Moon':       { insight:'Nothing hidden. All things revealed in silver light.',  correlation:'Feel what you feel fully. The moon asks nothing less.' },
+  'Waning Gibbous':  { insight:'The moon exhales. Light returns to where it came from.',correlation:'Release is its own kind of fullness.' },
+  'Last Quarter':    { insight:'Half returns to dark — an act of letting go.',          correlation:'What you shed now makes room for what comes next.' },
+  'Waning Crescent': { insight:'The thinnest veil before the dark. Rest is sacred.',   correlation:'Your stillness is not absence. It is preparation.' },
+};
+
+// ── PHASE ACCORDION BUILDER ──
+const PHASE_ORDER = ['menstruation','follicular','ovulation','luteal'];
+const PHASE_ICONS = {menstruation:'🕯️',follicular:'🌷',ovulation:'✨',luteal:'🍂'};
+
+function buildPhaseAccordion(currentPhase){
+  const container=document.getElementById('phaseAccordion');
+  container.innerHTML='';
+  PHASE_ORDER.forEach(p=>{
+    const info=getPhaseInfo(p);
+    const isActive=(p===currentPhase);
+    const card=document.createElement('div');
+    card.className=`phase-accordion-card ${p}${isActive?' active':''}`;
+    card.innerHTML=`
+      <div class="phase-card-header" onclick="toggleAccordion(this.parentElement)">
+        <h4>${PHASE_ICONS[p]} ${info.title.replace(/ 🕯️| 🌷| ✨| 🍂/,'')}</h4>
+        <span class="ph-arrow">▼</span>
+      </div>
+      <div class="phase-card-body">
+        <p class="ph-desc">${info.desc}</p>
+        <div class="phase-guidance-row"><span class="pgl pgl-${p}">Expect</span><span class="pgt">${info.expect}</span></div>
+        <div class="phase-guidance-row"><span class="pgl pgl-${p}">Try</span><span class="pgt">${info.try}</span></div>
+        <div class="phase-guidance-row"><span class="pgl pgl-${p}">Diet</span><span class="pgt">${info.diet}</span></div>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function toggleAccordion(card){
+  const isActive=card.classList.contains('active');
+  document.querySelectorAll('.phase-accordion-card').forEach(c=>c.classList.remove('active'));
+  if(!isActive) card.classList.add('active');
+}
+
 // ── MAIN UPDATE ──
 function updateCycles(){
   const val=document.getElementById('lastPeriodDate').value;
@@ -503,10 +566,13 @@ function updateCycles(){
   const dateStr=now.toLocaleDateString('en-US',{month:'long',day:'numeric'});
   document.getElementById('todayDateLeft').textContent=dateStr;
 
-  // Moon
+  // Moon + insight + correlation
   const moonPhase=getMoonPhase(now);
   document.getElementById('moonPhaseItalic').textContent=moonPhase.name+' Moon';
   document.getElementById('moonEmojiDisplay').textContent=MOON_EMOJI[moonPhase.name]||'🌕';
+  const moonData=MOON_INSIGHTS[moonPhase.name]||{insight:'',correlation:''};
+  document.getElementById('moonInsightLeft').textContent=moonData.insight;
+  document.getElementById('moonCorrelationRight').textContent=moonData.correlation;
 
   // Cycle info
   document.getElementById('todayDayNum').textContent=`Day ${day} of your cycle`;
@@ -522,52 +588,69 @@ function updateCycles(){
     feltSection.style.display='none';
   }
 
-  // Phase tab
-  document.getElementById('phaseHero').innerHTML=`
-    <div class="ph-title">${info.title}</div>
-    <div class="ph-desc">${info.desc}</div>
-    <div class="phase-guidance-row"><span class="pgl pgl-${phase}">Expect</span><span class="pgt">${info.expect}</span></div>
-    <div class="phase-guidance-row"><span class="pgl pgl-${phase}">Try</span><span class="pgt">${info.try}</span></div>
-    <div class="phase-guidance-row"><span class="pgl pgl-${phase}">Diet</span><span class="pgt">${info.diet}</span></div>
-  `;
+  // Phase accordion
+  buildPhaseAccordion(phase);
 
   buildTimeline(lpd,cl);
   generateDailyLog();
 }
 
-// ── TIMELINE (15-day grid, 3 rows of 5, today centered) ──
+// ── TIMELINE (5-col grid, rows visible + scroll, month header per row) ──
 function buildTimeline(lpd,cl){
   const con=document.getElementById('combinedCycles');con.innerHTML='';
+  const monthHdr=document.getElementById('cycleMonthHeader');monthHdr.innerHTML='';
   const today=new Date();today.setHours(0,0,0,0);
   const ds=Math.floor((today-lpd)/86400000);
-  // 15 days: 7 before today, today, 7 after
-  const total=15, before=7, startOff=ds-before;
+  const total=25, before=7, startOff=ds-before;
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+  // Pre-compute all dates
+  const dates=[];
   for(let i=0;i<total;i++){
     const d=new Date(lpd);d.setDate(lpd.getDate()+startOff+i);d.setHours(0,0,0,0);
+    dates.push(d);
+  }
+
+  // Build month header row (first 5 dates = first row)
+  for(let i=0;i<5;i++){
+    const cell=document.createElement('div');cell.className='cycle-month-cell';
+    if(i===0||dates[i].getMonth()!==dates[i-1].getMonth()){
+      cell.textContent=MONTHS[dates[i].getMonth()];
+    }
+    monthHdr.appendChild(cell);
+  }
+
+  // Build all 25 day cells, inserting a full-width month label row whenever month changes mid-grid
+  let lastRenderedMonth=dates[0].getMonth();
+
+  for(let i=0;i<total;i++){
+    const d=dates[i];
+    // When a new month starts mid-grid (not at position 0), insert a 5-col spanning month header
+    if(i>0&&i%5===0){
+      // Check if any of the next 5 cells start a new month vs previous 5
+      const newRowMonth=d.getMonth();
+      if(newRowMonth!==lastRenderedMonth){
+        const monthRow=document.createElement('div');
+        monthRow.className='cycle-row-month-label';
+        monthRow.textContent=MONTHS[newRowMonth];
+        con.appendChild(monthRow);
+        lastRenderedMonth=newRowMonth;
+      } else {
+        lastRenderedMonth=newRowMonth;
+      }
+    }
+
     const isT=d.getDate()===today.getDate()&&d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear();
     const mp=getMoonPhase(d);
     const cd=((startOff+i)%cl)+1;
     const cp=getMenstrualPhase(cd);
 
     const col=document.createElement('div');col.className='combined-day';
-
     const mc=document.createElement('div');mc.className='cal-moon-cell'+(isT?' today-highlight':'');
-    mc.innerHTML=`<div class="cal-moon-emoji">${MOON_EMOJI[mp.name]}</div><div class="cal-date-num">${d.getDate()}</div>`;
-
+    mc.innerHTML=`${isT?'<div class="today-marker-label">TODAY</div>':''}<div class="cal-moon-emoji">${MOON_EMOJI[mp.name]}</div><div class="cal-date-num">${d.getDate()}</div>`;
     const cc=document.createElement('div');cc.className=`cal-cycle-cell ${cp}`+(isT?' today-highlight':'');
     cc.textContent=`Day ${cd}`;
-
     col.appendChild(mc);col.appendChild(cc);
-
-    // Month label when month changes
-    const m=d.getMonth();
-    if(i===0||(i>0&&d.getDate()===1)){
-      const ml=document.createElement('div');ml.className='cal-month-label';
-      ml.textContent=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m];
-      col.appendChild(ml);
-    }
-
     con.appendChild(col);
   }
 }
@@ -649,6 +732,10 @@ if(hasSettings){
   document.getElementById('moonEmojiDisplay').textContent=MOON_EMOJI[initMoon.name]||'🌕';
   document.getElementById('moonPhaseItalic').textContent=initMoon.name+' Moon';
   document.getElementById('todayDateLeft').textContent=now.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+  const moonData=MOON_INSIGHTS[initMoon.name]||{insight:'',correlation:''};
+  document.getElementById('moonInsightLeft').textContent=moonData.insight;
+  document.getElementById('moonCorrelationRight').textContent=moonData.correlation;
+  buildPhaseAccordion(null);
   generateDailyLog();
 }
 </script>
